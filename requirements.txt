@@ -1,5 +1,8 @@
 Django>=4.2
 django-allauth>=0.57.0
 python-dotenv
+requests
+PyJWT
+cryptography
 
 #pip install -r requirements.txt

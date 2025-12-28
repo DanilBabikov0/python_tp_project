@@ -1,0 +1,9 @@
+<h1>Профиль</h1>
+<p>Имя: {{ name }}</p>
+{% if avatar %}
+    <img src="{{ avatar }}" alt="Аватар" width="100" height="100">
+{% else %}
+    <p>Аватар не найден</p>
+{% endif %}
+<br>
+<a href="/">Выйти</a>
