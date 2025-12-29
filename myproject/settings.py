@@ -49,8 +49,13 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',  # Google OAuth
 
+    # rest_framework
+    'rest_framework',
+
     # apps
-    'authapp'
+    'authapp',
+    'apiapp',
+    'mainapp'
 ]
 
 MIDDLEWARE = [
@@ -156,3 +161,13 @@ SOCIALACCOUNT_PROVIDERS = {
 }
 
 SOCIALACCOUNT_LOGIN_ON_GET = True
+
+# rest_framework
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+    ],
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+    ],
+}
