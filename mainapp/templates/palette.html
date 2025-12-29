@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Генератор палитр</title>
+    <link rel="stylesheet" href="/static/css/palette.css">
+</head>
+<body>
+    <h1>Главная страница</h1>
+
+    {% if user.is_authenticated %}
+        <p>Привет, {{ user.get_full_name|default:user.username }}!</p>
+        <a href="/profile/">Профиль</a> |
+        <a href="/logout/">Выйти</a>
+    {% else %}
+        <a href="/auth/">Войти</a>
+    {% endif %}
+
+    <h2>Генератор палитр</h2>
+
+    <div class="form-group">
+        <label>Базовый цвет (HEX):</label>
+        <input type="text" id="baseColor" value="#FF5733" placeholder="#FF5733">
+        <button onclick="randomColor()">Случайный цвет</button>
+    </div>
+
+    <button onclick="generatePalette()">Сгенерировать</button>
+
+    {% if user.is_authenticated %}
+        <button onclick="savePalette()">Сохранить палитру</button>
+
+        <div class="form-group">
+            <label>Загрузить изображение:</label>
+            <input type="file" id="imageUpload" accept="image/*">
+            <button onclick="extractColors()">Извлечь цвета</button>
+        </div>
+    {% endif %}
+
+    <div id="result" style="margin-top: 20px;"></div>
+
+    <script src="/static/js/palette.js"></script>
+</body>
+</html>

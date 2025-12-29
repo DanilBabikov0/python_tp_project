@@ -42,38 +42,9 @@ def generate_monochromatic(r, g, b):
         shades.append(tuple(int(c * 255) for c in rgb))
     return shades
 
+
 def generate_random_color():
     r = random.randint(0, 255)
     g = random.randint(0, 255)
     b = random.randint(0, 255)
     return (r, g, b)
-
-def generate_random_palette(count=5):
-    r, g, b = generate_random_color()
-    base_color = rgb_to_hex((r, g, b))
-
-    palette_types = ['analogous', 'complementary', 'triadic', 'monochromatic']
-    palette_type = random.choice(palette_types)
-
-    return generate_palette(base_color=base_color, count=count, palette_type=palette_type)
-
-def generate_palette(base_color, count=5, palette_type='analogous'):
-    if base_color.startswith('#'):
-        base_color = base_color[1:]
-
-    r, g, b = hex_to_rgb(base_color)
-
-    if palette_type == 'complementary':
-        colors = generate_complementary(r, g, b)
-    elif palette_type == 'triadic':
-        colors = generate_triadic(r, g, b)
-    elif palette_type == 'monochromatic':
-        colors = generate_monochromatic(r, g, b)
-    else:  # analogous
-        colors = generate_analogous(r, g, b)
-
-    hex_colors = [rgb_to_hex(c) for c in colors]
-    result = []
-    for i in range(count):
-        result.append(hex_colors[i % len(hex_colors)])
-    return result

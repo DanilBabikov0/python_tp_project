@@ -1,0 +1,26 @@
+<h1>Профиль</h1>
+<p>Имя: {{ name }}</p>
+{% if avatar %}
+    <img src="{{ avatar }}" alt="Аватар" width="100" height="100">
+{% else %}
+    <p>Аватар не найден</p>
+{% endif %}
+
+<h2>Сохранённые палитры:</h2>
+{% if palettes %}
+    <ul>
+        {% for palette in palettes %}
+            <li>
+                <strong>{{ palette.name }}</strong> (ID: {{ palette.id }}) —
+                {% for color in palette.colors.all %}
+                    <span style="display:inline-block; width:20px; height:20px; background-color:{{ color.hex_code }};" title="{{ color.hex_code }}"></span>
+                {% endfor %}
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>У вас нет сохранённых палитр.</p>
+{% endif %}
+
+<br>
+<a href="/logout/">Выйти</a>
