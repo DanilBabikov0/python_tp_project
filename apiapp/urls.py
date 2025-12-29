@@ -6,9 +6,9 @@ urlpatterns = [
     path('palettes/random/', views.random_palette_view, name='random_palette'),
 
     path('palettes/<str:username>/', views.get_palettes, name='get_palettes'),
-    path('palettes/<str:username>/create/', views.create_palette, name='create_palette'),
+    path('palettes/<str:username>/save/', views.save_palette, name='create_palette'),
     path('palettes/<str:username>/<str:palette_id>/', views.get_palette, name='get_palette'),
-    path('palettes/<str:username>/<str:palette_id>/', views.delete_palette, name='delete_palette'),
-    
+    path('palettes/<str:username>/<str:palette_id>/delete/', views.delete_palette, name='delete_palette'),
+
     path('docx/', views.docx, name='docx_page'),
 ]

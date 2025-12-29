@@ -1,25 +1,62 @@
-body {
-    font-family: Arial, sans-serif;
-    padding: 20px;
+.palette-section {
+    margin-bottom: 30px;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #f9f9f9;
 }
-.form-group {
+
+.palette-section h3 {
+    margin-top: 0;
     margin-bottom: 15px;
+    color: #333;
 }
-label {
-    display: block;
-    margin-bottom: 5px;
-}
-input, select, button {
-    padding: 8px;
-    margin: 5px;
-}
+
 .color-box {
     display: inline-block;
-    width: 50px;
-    height: 50px;
-    margin: 5px;
+    width: 120px;
+    height: 120px;
+    margin: 10px;
     border: 1px solid #ccc;
+    border-radius: 5px;
+    position: relative;
+    vertical-align: top;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
-.palette-section {
-    margin-bottom: 20px;
+
+.color-hex {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-family: monospace;
+    font-size: 14px;
+    padding: 5px;
+    background-color: rgba(255, 255, 255, 0.9);
+    border-top: 1px solid #ccc;
+}
+
+.palette-name-input {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    margin-right: 10px;
+    width: 250px;
+}
+
+.save-palette-btn {
+    padding: 8px 20px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.save-palette-btn:hover {
+    background-color: #45a049;
 }

@@ -27,8 +27,6 @@
     <button onclick="generatePalette()">Сгенерировать</button>
 
     {% if user.is_authenticated %}
-        <button onclick="savePalette()">Сохранить палитру</button>
-
         <div class="form-group">
             <label>Загрузить изображение:</label>
             <input type="file" id="imageUpload" accept="image/*">
@@ -38,6 +36,12 @@
 
     <div id="result" style="margin-top: 20px;"></div>
 
+    <script>
+        // Убедитесь, что username передается правильно
+        const username = '{{ user.username|escapejs }}';
+        console.log('Username:', username);
+    </script>
+    
     <script src="/static/js/palette.js"></script>
 </body>
 </html>

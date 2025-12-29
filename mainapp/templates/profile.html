@@ -8,13 +8,23 @@
 
 <h2>Сохранённые палитры:</h2>
 {% if palettes %}
-    <ul>
+    <ul id="palettes-list">
         {% for palette in palettes %}
-            <li>
-                <strong>{{ palette.name }}</strong> (ID: {{ palette.id }}) —
-                {% for color in palette.colors.all %}
-                    <span style="display:inline-block; width:20px; height:20px; background-color:{{ color.hex_code }};" title="{{ color.hex_code }}"></span>
-                {% endfor %}
+            <li id="palette-{{ palette.id }}" style="margin-bottom: 15px; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                <strong>{{ palette.name }}</strong> (ID: {{ palette.id }})<br>
+                <small>Создано: {{ palette.created_at|date:"d.m.Y H:i" }}</small>
+                <br>
+                <div style="margin: 10px 0;">
+                    {% for color in palette.colors.all %}
+                        <span style="display:inline-block; width:40px; height:40px; margin: 2px; border: 1px solid #ccc; border-radius: 4px; background-color:{{ color.hex_code }};" 
+                              title="{{ color.hex_code }}"></span>
+                    {% endfor %}
+                </div>
+                <button onclick="deletePalette('{{ palette.id }}', this)" 
+                        style="padding: 5px 10px; background-color: #f44336; color: white; border: none; border-radius: 3px; cursor: pointer;">
+                    Удалить
+                </button>
+                <span id="status-{{ palette.id }}" style="margin-left: 10px; display: none; color: green;">✓</span>
             </li>
         {% endfor %}
     </ul>
@@ -24,3 +34,91 @@
 
 <br>
 <a href="/logout/">Выйти</a>
+
+<script>
+    console.log('Текущий пользователь:', '{{ user.username }}');
+    
+    async function deletePalette(id, button) {
+        console.log('Попытка удалить палитру ID:', id);
+        
+        if (!confirm('Вы уверены, что хотите удалить палитру?')) {
+            return;
+        }
+        
+        const statusSpan = document.getElementById(`status-${id}`);
+        const listItem = document.getElementById(`palette-${id}`);
+        
+        // Отключаем кнопку и показываем загрузку
+        button.disabled = true;
+        button.textContent = 'Удаление...';
+        
+        try {
+            const response = await fetch(`/api/palettes/{{ user.username }}/${id}/delete/`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({})
+            });
+            
+            console.log('Статус ответа:', response.status);
+            console.log('URL запроса:', `/api/palettes/{{ user.username }}/${id}/delete/`);
+            
+            if (response.ok) {
+                const result = await response.json();
+                console.log('Результат удаления:', result);
+                
+                // Показываем успех
+                statusSpan.style.display = 'inline';
+                statusSpan.textContent = '✓ Удалено';
+                statusSpan.style.color = 'green';
+                
+                // Удаляем элемент из списка через 1 секунду
+                setTimeout(() => {
+                    listItem.style.opacity = '0.5';
+                    setTimeout(() => {
+                        listItem.remove();
+                        
+                        // Проверяем, остались ли палитры
+                        if (document.querySelectorAll('#palettes-list li').length === 0) {
+                            document.getElementById('palettes-list').innerHTML = '<p>У вас нет сохранённых палитр.</p>';
+                        }
+                    }, 300);
+                }, 1000);
+                
+            } else {
+                const errorData = await response.json().catch(() => ({ error: 'Неизвестная ошибка' }));
+                console.error('Ошибка сервера:', errorData);
+                
+                // Восстанавливаем кнопку
+                button.disabled = false;
+                button.textContent = 'Удалить';
+                
+                alert('Ошибка при удалении: ' + (errorData.error || errorData.detail || 'Неизвестная ошибка (статус: ' + response.status + ')'));
+            }
+        } catch (error) {
+            console.error('Ошибка сети:', error);
+            
+            // Восстанавливаем кнопку
+            button.disabled = false;
+            button.textContent = 'Удалить';
+            
+            alert('Ошибка сети при отправке запроса. Проверьте подключение к интернету.');
+        }
+    }
+    
+    // Тестовая функция для проверки API
+    async function testApi() {
+        console.log('Тестирование API...');
+        try {
+            const response = await fetch(`/api/palettes/{{ user.username }}/`);
+            const data = await response.json();
+            console.log('Данные пользователя:', data);
+        } catch (error) {
+            console.error('Ошибка теста API:', error);
+        }
+    }
+    
+    // Запускаем тест при загрузке страницы
+    window.addEventListener('load', testApi);
+</script>

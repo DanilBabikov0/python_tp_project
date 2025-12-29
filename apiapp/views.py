@@ -6,6 +6,10 @@ from django.contrib.auth import get_user_model
 from apiapp.models import Color, Palette
 from .color_utils import *
 from django.shortcuts import render
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
+import json
 
 def docx(request):
     return render(request, 'docx.html')
@@ -47,9 +51,27 @@ def random_palette_view(request):
     return Response(result)
 
 # user
+@api_view(['GET'])
+def get_palettes(request, username):
+    try:
+        user = User.objects.get(username=username)
+    except User.DoesNotExist:
+        return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    palettes = Palette.objects.filter(owner=user)
+    result = []
+    for p in palettes:
+        color_list = [c.hex_code for c in p.colors.all()]
+        result.append({
+            'id': str(p.id),
+            'name': p.name,
+            'colors': color_list
+        })
+    return Response(result)
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def create_palette(request, username):
+def save_palette(request, username):
     if request.user.username != username:
         return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
 
@@ -71,28 +93,6 @@ def create_palette(request, username):
     })
 
 @api_view(['GET'])
-def get_palettes(request, username):
-    try:
-        user = User.objects.get(username=username)
-    except User.DoesNotExist:
-        return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
-
-    limit = int(request.GET.get('limit', 20))
-    if limit > 100:
-        limit = 100
-
-    palettes = Palette.objects.filter(owner=user)[:limit]
-    result = []
-    for p in palettes:
-        color_list = [c.hex_code for c in p.colors.all()]
-        result.append({
-            'id': str(p.id),
-            'name': p.name,
-            'colors': color_list
-        })
-    return Response(result)
-
-@api_view(['GET'])
 def get_palette(request, username, palette_id):
     try:
         user = User.objects.get(username=username)
@@ -107,17 +107,20 @@ def get_palette(request, username, palette_id):
         'colors': color_list
     })
 
-@api_view(['DELETE'])
-@permission_classes([IsAuthenticated])
+@csrf_exempt
+@login_required
 def delete_palette(request, username, palette_id):
+    if request.method != 'DELETE':
+        return JsonResponse({'error': 'Method not allowed'}, status=405)
+    
+    # Проверяем, что пользователь удаляет свою палитру
+    if request.user.username != username:
+        return JsonResponse({'error': 'Permission denied'}, status=403)
+    
     try:
-        user = User.objects.get(username=username)
-        palette = Palette.objects.get(id=palette_id, owner=user)
+        palette = Palette.objects.get(id=palette_id, owner=request.user)
     except Palette.DoesNotExist:
-        return Response({'error': 'Palette not found'}, status=status.HTTP_404_NOT_FOUND)
-
-    if request.user != palette.owner:
-        return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
-
+        return JsonResponse({'error': 'Palette not found'}, status=404)
+    
     palette.delete()
-    return Response({'success': True})
+    return JsonResponse({'success': True, 'message': 'Палитра удалена'})
