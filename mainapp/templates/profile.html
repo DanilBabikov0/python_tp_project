@@ -48,7 +48,6 @@
         const statusSpan = document.getElementById(`status-${id}`);
         const listItem = document.getElementById(`palette-${id}`);
         
-        // Отключаем кнопку и показываем загрузку
         button.disabled = true;
         button.textContent = 'Удаление...';
         
@@ -67,19 +66,16 @@
             if (response.ok) {
                 const result = await response.json();
                 console.log('Результат удаления:', result);
-                
-                // Показываем успех
+
                 statusSpan.style.display = 'inline';
                 statusSpan.textContent = '✓ Удалено';
                 statusSpan.style.color = 'green';
                 
-                // Удаляем элемент из списка через 1 секунду
                 setTimeout(() => {
                     listItem.style.opacity = '0.5';
                     setTimeout(() => {
                         listItem.remove();
                         
-                        // Проверяем, остались ли палитры
                         if (document.querySelectorAll('#palettes-list li').length === 0) {
                             document.getElementById('palettes-list').innerHTML = '<p>У вас нет сохранённых палитр.</p>';
                         }
@@ -90,7 +86,6 @@
                 const errorData = await response.json().catch(() => ({ error: 'Неизвестная ошибка' }));
                 console.error('Ошибка сервера:', errorData);
                 
-                // Восстанавливаем кнопку
                 button.disabled = false;
                 button.textContent = 'Удалить';
                 
@@ -99,7 +94,6 @@
         } catch (error) {
             console.error('Ошибка сети:', error);
             
-            // Восстанавливаем кнопку
             button.disabled = false;
             button.textContent = 'Удалить';
             
@@ -107,7 +101,6 @@
         }
     }
     
-    // Тестовая функция для проверки API
     async function testApi() {
         console.log('Тестирование API...');
         try {
@@ -119,6 +112,5 @@
         }
     }
     
-    // Запускаем тест при загрузке страницы
     window.addEventListener('load', testApi);
 </script>

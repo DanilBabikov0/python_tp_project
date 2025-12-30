@@ -10,5 +10,7 @@ urlpatterns = [
     path('palettes/<str:username>/<str:palette_id>/', views.get_palette, name='get_palette'),
     path('palettes/<str:username>/<str:palette_id>/delete/', views.delete_palette, name='delete_palette'),
 
-    path('docx/', views.docx, name='docx_page'),
+    path('extract/', views.extract_colors_view, name='extract_colors'),
+    
+    path('docx/', views.docx_page, name='docx_page'),
 ]
