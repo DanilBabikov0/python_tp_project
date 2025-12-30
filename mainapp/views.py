@@ -4,6 +4,7 @@ from apiapp.models import Palette
 from django.shortcuts import redirect
 from django.contrib.auth import logout
 
+# PAGE
 def palette_page(request):
     return render(request, 'palette.html')
 
@@ -22,9 +23,14 @@ def profile_page(request):
     }
     return render(request, 'profile.html', context)
 
+@login_required
+def image_upload_page(request):
+    return render(request, 'image_upload.html')
+
 def auth_page(request):
     return render(request, 'auth.html')
 
+# AUTH
 def logout_view(request):
     logout(request)
     return redirect('/')

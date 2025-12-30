@@ -1,22 +1,25 @@
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
-from rest_framework import status
+from django.views.decorators.http import require_http_methods
 from django.contrib.auth import get_user_model
-from apiapp.models import Color, Palette
-from .color_utils import *
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
-import json
 
-def docx(request):
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework import status
+
+from apiapp.models import Color, Palette, ImagePalette
+
+from .color_utils import *
+from .image_utils import extract_colors, create_preview
+
+# PAGE
+def docx_page(request):
     return render(request, 'docx.html')
 
-User = get_user_model()
-
-# generate
+# GENERATE
 @api_view(['GET'])
 def generate_palette_view(request):
     base = request.GET.get('base', 'FF5733')
@@ -50,7 +53,9 @@ def random_palette_view(request):
 
     return Response(result)
 
-# user
+# USER
+User = get_user_model()
+
 @api_view(['GET'])
 def get_palettes(request, username):
     try:
@@ -113,7 +118,6 @@ def delete_palette(request, username, palette_id):
     if request.method != 'DELETE':
         return JsonResponse({'error': 'Method not allowed'}, status=405)
     
-    # Проверяем, что пользователь удаляет свою палитру
     if request.user.username != username:
         return JsonResponse({'error': 'Permission denied'}, status=403)
     
@@ -124,3 +128,55 @@ def delete_palette(request, username, palette_id):
     
     palette.delete()
     return JsonResponse({'success': True, 'message': 'Палитра удалена'})
+
+
+# image
+@csrf_exempt
+@require_http_methods(["POST"])
+def extract_colors_view(request):
+    try:
+        if 'image' not in request.FILES:
+            return JsonResponse({"error": "Image file is required"}, status=400)
+        
+        image_file = request.FILES['image']
+        
+        count = request.POST.get('count', '5')
+        try:
+            count = int(count)
+            if count < 1 or count > 20:
+                count = 5
+        except (ValueError, TypeError):
+            count = 5
+        
+        hex_colors = extract_colors(image_file, count)
+        
+        preview_file = create_preview(image_file)
+        
+        palette = None
+        if request.user.is_authenticated:
+            palette = ImagePalette.objects.create(
+                image_name=image_file.name,
+                preview=preview_file,
+                colors=hex_colors,
+                owner=request.user
+            )
+        
+        response_data = {
+            "colors": hex_colors,
+            "count": count,
+            "filename": image_file.name
+        }
+        
+        if palette:
+            response_data.update({
+                "palette_id": palette.id,
+                "created_at": palette.created_at.isoformat()
+            })
+        
+        return JsonResponse(response_data)
+        
+    except Exception as e:
+        return JsonResponse({
+            "error": f"Failed to extract colors: {str(e)}",
+            "error_type": type(e).__name__
+        }, status=500)
