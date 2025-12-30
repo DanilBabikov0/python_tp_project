@@ -1,6 +1,7 @@
-import json
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils import timezone
+import os
 
 class Palette(models.Model):
     id = models.AutoField(primary_key=True)
@@ -22,10 +23,16 @@ class Color(models.Model):
 class ImagePalette(models.Model):
     id = models.AutoField(primary_key=True)
     image_name = models.CharField(max_length=100)
-    preview = models.ImageField(upload_to='previews/', blank=True, null=True)
+    preview = models.ImageField(upload_to='', blank=True, null=True)
     colors = models.JSONField()
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.image_name} ({self.owner.username})"
+    
+    def delete(self, *args, **kwargs):
+        if self.preview:
+            if os.path.isfile(self.preview.path):
+                os.remove(self.preview.path)
+        super().delete(*args, **kwargs)

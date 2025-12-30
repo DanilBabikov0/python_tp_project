@@ -180,3 +180,54 @@ def extract_colors_view(request):
             "error": f"Failed to extract colors: {str(e)}",
             "error_type": type(e).__name__
         }, status=500)
+    
+
+@api_view(['GET'])
+def get_user_image_palettes(request, username):
+    try:
+        user = User.objects.get(username=username)
+    except User.DoesNotExist:
+        return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    palettes = ImagePalette.objects.filter(owner=user)
+    result = []
+    for p in palettes:
+        result.append({
+            'id': p.id,
+            'image_name': p.image_name,
+            'preview': p.preview.url if p.preview else None,
+            'colors': p.colors,
+            'created_at': p.created_at.isoformat()
+        })
+    return Response(result)
+
+@api_view(['GET'])
+def get_image_palette(request, username, id):
+    try:
+        user = User.objects.get(username=username)
+        palette = ImagePalette.objects.get(id=id, owner=user)
+    except ImagePalette.DoesNotExist:
+        return Response({'error': 'Palette not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    return Response({
+        'id': palette.id,
+        'image_name': palette.image_name,
+        'preview': palette.preview.url if palette.preview else None,
+        'colors': palette.colors,
+        'created_at': palette.created_at.isoformat()
+    })
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def delete_image_palette(request, username, id):
+    try:
+        user = User.objects.get(username=username)
+        palette = ImagePalette.objects.get(id=id, owner=user)
+    except ImagePalette.DoesNotExist:
+        return Response({'error': 'Palette not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    if request.user != palette.owner:
+        return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
+
+    palette.delete()
+    return Response({'success': True})

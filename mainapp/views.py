@@ -27,6 +27,10 @@ def profile_page(request):
 def image_upload_page(request):
     return render(request, 'image_upload.html')
 
+@login_required
+def image_palettes_view(request):
+    return render(request, 'image_palettes.html')
+
 def auth_page(request):
     return render(request, 'auth.html')
 

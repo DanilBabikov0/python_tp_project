@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Мои палитры изображений</title>
+    <style>
+        .palette-item {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        .color-box {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            margin: 2px;
+        }
+        img {
+            width: 100px;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Мои палитры изображений</h1>
+
+    <button onclick="loadPalettes()">Загрузить палитры</button>
+
+    <div id="palettes-list"></div>
+
+    <script>
+        const username = '{{ user.username }}';
+
+        async function loadPalettes() {
+            const response = await fetch(`/api/image/${username}/`);
+            const palettes = await response.json();
+
+            const listDiv = document.getElementById('palettes-list');
+            listDiv.innerHTML = '';
+
+            palettes.forEach(palette => {
+                const item = document.createElement('div');
+                item.className = 'palette-item';
+
+                item.innerHTML = `
+                    <h3>${palette.image_name}</h3>
+                    <img src="${palette.preview}" alt="Preview">
+                    <p>Цвета:</p>
+                    <div>
+                        ${palette.colors.map(color => 
+                            `<div class="color-box" style="background-color: ${color};" title="${color}"></div>`
+                        ).join('')}
+                    </div>
+                    <button onclick="deletePalette(${palette.id})">Удалить</button>
+                `;
+
+                listDiv.appendChild(item);
+            });
+        }
+
+        async function deletePalette(id) {
+            if (!confirm('Удалить палитру?')) return;
+
+            const response = await fetch(`/api/image/${username}/${id}/delete/`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                }
+            });
+
+            if (response.ok) {
+                alert('Палитра удалена');
+                loadPalettes();
+            } else {
+                alert('Ошибка при удалении');
+            }
+        }
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    </script>
+</body>
+</html>
