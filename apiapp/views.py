@@ -4,16 +4,18 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
+from django.utils import timezone
 
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 
-from apiapp.models import Color, Palette, ImagePalette
+from apiapp.models import Color, Palette, ImagePalette, ExtractUsage
 
 from .color_utils import *
 from .image_utils import extract_colors, create_preview
+from datetime import timedelta
 
 # PAGE
 def docx_page(request):
@@ -130,10 +132,32 @@ def delete_palette(request, username, palette_id):
     return JsonResponse({'success': True, 'message': 'Палитра удалена'})
 
 
-# image
+# IMAGE
 @csrf_exempt
 @require_http_methods(["POST"])
 def extract_colors_view(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "Authentication required"}, status=401)
+
+    now = timezone.now()
+    timed = now - timedelta(minutes=5)
+
+    ExtractUsage.objects.filter(last_used__lt=timed).delete()
+
+    try:
+        usage = ExtractUsage.objects.get(
+            user=request.user,
+            last_used__gte=timed
+        )
+    except ExtractUsage.DoesNotExist:
+        usage = ExtractUsage.objects.create(
+            user=request.user,
+            count=0
+        )
+
+    if usage.count >= 10:
+        return JsonResponse({"error": "Limit exceeded (10 extracts per 30 minutes)"}, status=429)
+
     try:
         if 'image' not in request.FILES:
             return JsonResponse({"error": "Image file is required"}, status=400)
@@ -151,15 +175,25 @@ def extract_colors_view(request):
         hex_colors = extract_colors(image_file, count)
         
         preview_file = create_preview(image_file)
-        
+
         palette = None
-        if request.user.is_authenticated:
+        existing_palette = ImagePalette.objects.filter(
+            owner=request.user,
+            colors=hex_colors
+        ).first()
+        
+        if existing_palette:
+            palette = existing_palette
+        else:
             palette = ImagePalette.objects.create(
                 image_name=image_file.name,
                 preview=preview_file,
                 colors=hex_colors,
                 owner=request.user
             )
+        
+        usage.count += 1
+        usage.save()
         
         response_data = {
             "colors": hex_colors,

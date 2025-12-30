@@ -36,3 +36,11 @@ class ImagePalette(models.Model):
             if os.path.isfile(self.preview.path):
                 os.remove(self.preview.path)
         super().delete(*args, **kwargs)
+
+class ExtractUsage(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    last_used = models.DateTimeField(auto_now_add=True) 
+    count = models.IntegerField(default=0)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.last_used}: {self.count}"
