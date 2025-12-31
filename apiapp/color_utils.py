@@ -42,9 +42,19 @@ def generate_monochromatic(r, g, b):
         shades.append(tuple(int(c * 255) for c in rgb))
     return shades
 
-
 def generate_random_color():
     r = random.randint(0, 255)
     g = random.randint(0, 255)
     b = random.randint(0, 255)
     return (r, g, b)
+
+
+def palette_response(r, g, b):
+    base = rgb_to_hex((r, g, b))
+    return {
+        'base_color': f"{base}",
+        'analogous': [rgb_to_hex(c) for c in generate_analogous(r, g, b)],
+        'complementary': [rgb_to_hex(c) for c in generate_complementary(r, g, b)],
+        'triadic': [rgb_to_hex(c) for c in generate_triadic(r, g, b)],
+        'monochromatic': [rgb_to_hex(c) for c in generate_monochromatic(r, g, b)],
+    }

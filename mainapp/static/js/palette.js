@@ -107,7 +107,6 @@ async function savePalette(colors, name, type) {
     try {
         console.log('Отправка POST запроса...');
         
-        // Получаем CSRF токен из куки
         const csrfToken = getCookie('csrftoken');
         console.log('CSRF Token:', csrfToken);
         
@@ -115,7 +114,7 @@ async function savePalette(colors, name, type) {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRFToken': csrfToken,  // Добавляем CSRF токен
+                'X-CSRFToken': csrfToken,
             },
             body: JSON.stringify({
                 name: name,
@@ -141,7 +140,6 @@ async function savePalette(colors, name, type) {
     }
 }
 
-// Функция для получения CSRF токена из куки
 function getCookie(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {

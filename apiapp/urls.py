@@ -7,8 +7,8 @@ urlpatterns = [
 
     path('palettes/<str:username>/', views.get_palettes, name='get_palettes'),
     path('palettes/<str:username>/save/', views.save_palette, name='create_palette'),
-    path('palettes/<str:username>/<str:palette_id>/', views.get_palette, name='get_palette'),
-    path('palettes/<str:username>/<str:palette_id>/delete/', views.delete_palette, name='delete_palette'),
+    path('palettes/<str:username>/<int:palette_id>/', views.get_palette, name='get_palette'),
+    path('palettes/<str:username>/<int:palette_id>/delete/', views.delete_palette, name='delete_palette'),
 
     path('extract/', views.extract_colors_view, name='extract_colors'),
     path('image/<str:username>/', views.get_user_image_palettes, name='get_user_image_palettes'),
