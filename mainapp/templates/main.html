@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Генератор Палитр</title>
+    <link rel="stylesheet" href="/static/css/main.css">
+</head>
+<body>
+    <header>
+        <h1>Генератор Палитр</h1>
+        <nav>
+            {% if user.is_authenticated %}
+                <button onclick="showSavedPalettes()">Сохраненные палитры</button>
+                <a href="/logout/"><button>Выйти</button></a>
+            {% else %}
+                <a href="/auth/"><button>Авторизоваться</button></a>
+            {% endif %}
+            <button onclick="generateRandomAll()">Сгенерировать все</button>
+        </nav>
+    </header>
+
+    <div class="controls">
+        <input type="color" id="colorPicker">
+        <input type="text" id="colorInput" placeholder="#FF5733">
+        <button onclick="randomColor()">Случайный цвет</button>
+        <button onclick="generatePalette()">Генерировать</button>
+    </div>
+
+    <div id="palettes">
+        <div class="palette-section" id="monochromatic">
+            <h2>Monochromatic</h2>
+            <input type="text" id="monochromaticName" placeholder="Name">
+            <button onclick="generateRandom('monochromatic')">Сгенерировать снова</button>
+            {% if user.is_authenticated %}
+                <button onclick="savePalette('monochromatic')">Сохранить палитру</button>
+            {% endif %}
+            <div class="colors-container" id="monochromatic-colors"></div>
+            <div class="hex-container" id="monochromatic-hex"></div>
+            <button onclick="copyAll('monochromatic')">Скопировать цвета</button>
+        </div>
+
+        <div class="palette-section" id="analogous">
+            <h2>Analogous</h2>
+            <input type="text" id="analogousName" placeholder="Name">
+            <button onclick="generateRandom('analogous')">Сгенерировать снова</button>
+            {% if user.is_authenticated %}
+                <button onclick="savePalette('analogous')">Сохранить палитру</button>
+            {% endif %}
+            <div class="colors-container" id="analogous-colors"></div>
+            <div class="hex-container" id="analogous-hex"></div>
+            <button onclick="copyAll('analogous')">Скопировать цвета</button>
+        </div>
+
+        <div class="palette-section" id="complementary">
+            <h2>Complementary</h2>
+            <input type="text" id="complementaryName" placeholder="Name">
+            <button onclick="generateRandom('complementary')">Сгенерировать снова</button>
+            {% if user.is_authenticated %}
+                <button onclick="savePalette('complementary')">Сохранить палитру</button>
+            {% endif %}
+            <div class="colors-container" id="complementary-colors"></div>
+            <div class="hex-container" id="complementary-hex"></div>
+            <button onclick="copyAll('complementary')">Скопировать цвета</button>
+        </div>
+
+        <div class="palette-section" id="triadic">
+            <h2>Triadic</h2>
+            <input type="text" id="triadicName" placeholder="Name">
+            <button onclick="generateRandom('triadic')">Сгенерировать снова</button>
+            {% if user.is_authenticated %}
+                <button onclick="savePalette('triadic')">Сохранить палитру</button>
+            {% endif %}
+            <div class="colors-container" id="triadic-colors"></div>
+            <div class="hex-container" id="triadic-hex"></div>
+            <button onclick="copyAll('triadic')">Скопировать цвета</button>
+        </div>
+    </div>
+
+    <footer>
+        <p>Генератор Палитр</p>
+    </footer>
+
+    <script>
+        document.getElementById('colorPicker').addEventListener('input', function() {
+            document.getElementById('colorInput').value = this.value;
+            hideError();
+        });
+
+        document.getElementById('colorInput').addEventListener('input', function() {
+            const color = this.value;
+            if (/^#[0-9A-F]{6}$/i.test(color)) {
+                document.getElementById('colorPicker').value = color;
+            }
+            hideError();
+        });
+    </script>
+    <script>
+        const username = '{{ user.username }}';
+        {% if user.socialaccount_set.exists %}
+            const avatar = '{{ user.socialaccount_set.first.get_avatar_url }}';
+        {% else %}
+            const avatar = '/static/images/default-avatar.png';
+        {% endif %}
+    </script>
+    <script src="/static/js/main.js"></script>
+</body>
+</html>

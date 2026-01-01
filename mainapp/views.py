@@ -9,7 +9,7 @@ def palette_page(request):
     return render(request, 'palette.html')
 
 def home_page(request):
-    return render(request, 'home.html')
+    return render(request, 'main.html')
 
 @login_required
 def profile_page(request):
