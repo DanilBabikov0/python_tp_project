@@ -25,7 +25,7 @@ def profile_page(request):
 
 @login_required
 def image_upload_page(request):
-    return render(request, 'image_upload.html')
+    return render(request, 'extract.html')
 
 @login_required
 def image_palettes_view(request):

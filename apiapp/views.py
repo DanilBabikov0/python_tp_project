@@ -160,7 +160,7 @@ def extract_colors_view(request):
         count = request.POST.get('count', '5')
         try:
             count = int(count)
-            if count < 1 or count > 20:
+            if count < 1 or count > 10:
                 count = 5
         except (ValueError, TypeError):
             count = 5

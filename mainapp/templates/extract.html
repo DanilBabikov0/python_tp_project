@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Генератор Палитр - Извлечение цветов</title>
+    <link rel="stylesheet" href="/static/css/extract.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <h1>Генератор Палитр</h1>
+        <p>Извлечение цветов из изображения</p>
+        <nav>
+            <button onclick="loadImagePalettes()"><img src="/static/img/save.png" alt="Save">Сохраненные</button>
+            <a href="/"><button>Генератор палитр</button></a>
+            <a href="/logout/"><button><img src="/static/img/logout.png" alt="Logout">Выйти</button></a>
+        </nav>
+    </header>
+
+    <div class="upload-container">
+        <h2>Загрузите изображение</h2>
+        
+        <form id="uploadForm" enctype="multipart/form-data">
+            <div class="file-input-wrapper">
+                <input type="file" id="imageInput" name="image" accept="image/jpeg,image/png,image/gif,image/webp" required>
+                <label for="imageInput" id="fileLabel">Выберите изображение</label>
+            </div>
+            
+            <div class="image-preview"></div>
+            
+            <div class="options">
+                <label for="colorCount">Количество цветов (1-10):</label>
+                <input type="number" id="colorCount" name="count" min="1" max="10" value="5">
+            </div>
+            
+            <button type="submit" id="submitButton">
+                <span>Извлечь цвета</span>
+            </button>
+        </form>
+        
+        <div id="upload-progress" class="upload-progress"></div>
+        
+        <div class="limits-info">
+            <p>
+                <strong>Ограничения:</strong> 10 извлечений за 60 минут.<br>
+                <strong>Форматы:</strong> JPG, PNG, GIF, WEBP.<br>
+                <strong>Размер:</strong> до 10MB.
+            </p>
+        </div>
+    </div>
+
+    <div class="palette-section">
+        <h2>Результат извлечения</h2>
+        <p>Цвета будут отображены здесь после обработки</p>
+        <div class="colors-container" id="colors">
+            <div class="placeholder">
+                Загрузите изображение для извлечения цветов
+            </div>
+        </div>
+        <div class="hex-and-copy">
+            <div class="hex-container" id="hex">
+                <span class="hex-placeholder">HEX значения</span>
+            </div>
+            <button class="copy-button" onclick="copyAll()">
+                <img src="/static/img/copy.png" alt="Copy">Скопировать все
+            </button>
+        </div>
+    </div>
+
+    <footer>
+        <p>Извлечение цветов из изображения • {% now "Y" %}</p>
+    </footer>
+
+    <script>
+        const username = '{{ user.username }}';
+        
+        {% if user.socialaccount_set.exists %}
+            const avatar = '{{ user.socialaccount_set.first.get_avatar_url }}';
+        {% else %}
+            const avatar = '/static/images/default-avatar.png';
+        {% endif %}
+    </script>
+    
+    <script src="/static/js/extract.js"></script>
+</body>
+</html>

@@ -1,7 +1,6 @@
 let palettesData = {};
 let savedPalettes = {};
 
-// При загрузке страницы сразу генерируем случайные палитры
 document.addEventListener('DOMContentLoaded', function() {
     generateRandomAll();
 });
@@ -82,8 +81,7 @@ async function generateRandom(type) {
 
         palettesData = data;
         displaySinglePalette(type, data[type]);
-        
-        // Сбрасываем состояние кнопки сохранения только если пользователь авторизован
+
         if (username) {
             resetSaveButton(type);
         }
@@ -105,24 +103,20 @@ function resetSaveButton(type) {
 }
 
 function showNotification(message, type = 'info') {
-    // Удаляем старое уведомление, если есть
     const oldNotification = document.querySelector('.notification');
     if (oldNotification) {
         oldNotification.remove();
     }
     
-    // Создаем новое уведомление
     const notification = document.createElement('div');
     notification.className = `notification ${type}`;
     notification.textContent = message;
     document.body.appendChild(notification);
     
-    // Показываем уведомление
     setTimeout(() => {
         notification.classList.add('show');
     }, 10);
     
-    // Скрываем через 3 секунды
     setTimeout(() => {
         notification.classList.remove('show');
         setTimeout(() => {
@@ -132,7 +126,6 @@ function showNotification(message, type = 'info') {
 }
 
 async function savePalette(type) {
-    // Проверяем авторизацию
     if (!username) {
         showNotification('Вы не авторизованы. Авторизуйтесь для сохранения палитр.', 'error');
         return;
@@ -146,7 +139,6 @@ async function savePalette(type) {
         return;
     }
     
-    // Если палитра уже сохранена - удаляем ее
     if (saveButton.classList.contains('saved') && savedPalettes[type]) {
         await deletePaletteById(savedPalettes[type].id, type);
         return;
@@ -186,13 +178,11 @@ async function savePalette(type) {
 
         const result = await response.json();
         
-        // Сохраняем информацию о сохраненной палитре
         savedPalettes[type] = {
             id: result.id,
             colors: colors
         };
         
-        // Меняем состояние кнопки
         saveButton.classList.add('saved');
         saveButton.innerHTML = '<img src="/static/img/save.png" alt="Saved">Сохранено';
         
@@ -221,7 +211,6 @@ async function deletePaletteById(paletteId, type = null) {
             throw new Error(`Ошибка: ${response.status}`);
         }
 
-        // Если передан тип, сбрасываем кнопку
         if (type && savedPalettes[type]) {
             const saveButton = document.getElementById(`save-${type}`);
             if (saveButton) {
@@ -231,15 +220,13 @@ async function deletePaletteById(paletteId, type = null) {
             delete savedPalettes[type];
         }
         
-        // Если открыт попап с сохраненными палитрами, обновляем его
         const popup = document.getElementById('palettes-popup');
         if (popup) {
             const item = popup.querySelector(`[data-palette-id="${paletteId}"]`);
             if (item) {
                 item.remove();
             }
-            
-            // Если больше нет палитр, показываем сообщение
+
             const list = popup.querySelector('#saved-palettes-list');
             if (list.children.length === 0) {
                 list.innerHTML = '<p>Нет сохраненных палитр</p>';
@@ -317,7 +304,6 @@ function displayPalettes(data) {
             }
         }
         
-        // Сбрасываем состояние кнопок сохранения только для авторизованных пользователей
         if (username) {
             resetSaveButton(type);
         }
@@ -357,7 +343,6 @@ function copyAll(type) {
     }
 }
 
-// Функция для копирования всех цветов из сохраненной палитры
 function copySavedPalette(paletteId, paletteName) {
     const popup = document.getElementById('palettes-popup');
     if (!popup) return;
@@ -422,7 +407,7 @@ function showPalettesPopup(username, palettes) {
                 <div data-palette-id="${p.id}">
                     <strong>${p.name}</strong>
                     <div class="palette-buttons">
-                        <button class="delete-btn" onclick="deletePalette(${p.id})">Удалить</button>
+                        <button class="delete-btn" onclick="deletePaletteById(${p.id})">Удалить</button>
                     </div>
                     <div class="palette-colors">
                         ${p.colors.map(c => `
@@ -443,8 +428,4 @@ function showPalettesPopup(username, palettes) {
 function closePalettesPopup() {
     const popup = document.getElementById('palettes-popup');
     if (popup) popup.remove();
-}
-
-async function deletePalette(paletteId) {
-    await deletePaletteById(paletteId);
 }
