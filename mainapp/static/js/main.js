@@ -1,18 +1,33 @@
 let palettesData = {};
+let savedPalettes = {};
+
+// При загрузке страницы сразу генерируем случайные палитры
+document.addEventListener('DOMContentLoaded', function() {
+    generateRandomAll();
+});
+
+document.getElementById('colorPicker').addEventListener('input', function() {
+    document.getElementById('colorInput').value = this.value;
+});
+
+document.getElementById('colorInput').addEventListener('input', function() {
+    const color = this.value;
+    if (/^#[0-9A-F]{6}$/i.test(color)) {
+        document.getElementById('colorPicker').value = color;
+    }
+});
 
 function randomColor() {
     const randomColor = '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
     document.getElementById('colorInput').value = randomColor;
     document.getElementById('colorPicker').value = randomColor;
-
-    hideError();
 }
 
 async function generatePalette() {
     const baseColor = document.getElementById('colorInput').value;
 
     if (!baseColor) {
-        showError('Введите цвет');
+        showNotification('Введите цвет', 'error');
         return;
     }
 
@@ -22,12 +37,12 @@ async function generatePalette() {
     }
 
     if (!/^[0-9A-F]{6}$/i.test(cleanColor)) {
-        showError('Введите цвет в формате #FFFFFF');
+        showNotification('Введите цвет в формате #FFFFFF', 'error');
         return;
     }
 
     try {
-        const response = await fetch(`/api/palettes/generate/?base=${cleanColor}`);//url
+        const response = await fetch(`/api/palettes/generate/?base=${cleanColor}`);
         if (!response.ok) {
             throw new Error(`Ошибка: ${response.status}`);
         }
@@ -35,16 +50,15 @@ async function generatePalette() {
 
         palettesData = data;
         displayPalettes(data);
-        hideError();
     } catch (e) {
         console.error(e);
-        showError('Не удалось загрузить палитру');
+        showNotification('Не удалось загрузить палитру', 'error');
     }
 }
 
 async function generateRandomAll() {
     try {
-        const response = await fetch('/api/palettes/random/');//url
+        const response = await fetch('/api/palettes/random/');
         if (!response.ok) {
             throw new Error(`Ошибка: ${response.status}`);
         }
@@ -52,36 +66,94 @@ async function generateRandomAll() {
 
         palettesData = data;
         displayPalettes(data);
-        hideError();
     } catch (e) {
         console.error(e);
-        showError('Не удалось загрузить случайные палитры');
+        showNotification('Не удалось загрузить случайные палитры', 'error');
     }
 }
 
 async function generateRandom(type) {
     try {
-        const response = await fetch('/api/palettes/random/');//url
+        const response = await fetch('/api/palettes/random/');
         if (!response.ok) {
             throw new Error(`Ошибка: ${response.status}`);
         }
         const data = await response.json();
 
         palettesData = data;
-
         displaySinglePalette(type, data[type]);
-        hideError();
+        
+        // Сбрасываем состояние кнопки сохранения только если пользователь авторизован
+        if (username) {
+            resetSaveButton(type);
+        }
     } catch (e) {
         console.error(e);
-        showError(`Не удалось загрузить палитру ${type}`);
+        showNotification(`Не удалось загрузить палитру ${type}`, 'error');
     }
 }
 
-// save
+function resetSaveButton(type) {
+    const saveButton = document.getElementById(`save-${type}`);
+    if (saveButton) {
+        saveButton.classList.remove('saved');
+        saveButton.innerHTML = '<img src="/static/img/save.png" alt="Save">Сохранить';
+        if (savedPalettes[type]) {
+            delete savedPalettes[type];
+        }
+    }
+}
+
+function showNotification(message, type = 'info') {
+    // Удаляем старое уведомление, если есть
+    const oldNotification = document.querySelector('.notification');
+    if (oldNotification) {
+        oldNotification.remove();
+    }
+    
+    // Создаем новое уведомление
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    
+    // Показываем уведомление
+    setTimeout(() => {
+        notification.classList.add('show');
+    }, 10);
+    
+    // Скрываем через 3 секунды
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => {
+            notification.remove();
+        }, 300);
+    }, 3000);
+}
+
 async function savePalette(type) {
+    // Проверяем авторизацию
+    if (!username) {
+        showNotification('Вы не авторизованы. Авторизуйтесь для сохранения палитр.', 'error');
+        return;
+    }
+    
     const colors = palettesData[type];
+    const saveButton = document.getElementById(`save-${type}`);
+    
+    if (!saveButton) {
+        showNotification('Кнопка сохранения не найдена', 'error');
+        return;
+    }
+    
+    // Если палитра уже сохранена - удаляем ее
+    if (saveButton.classList.contains('saved') && savedPalettes[type]) {
+        await deletePaletteById(savedPalettes[type].id, type);
+        return;
+    }
+    
     if (!colors || !Array.isArray(colors)) {
-        showError(`Нет данных для сохранения ${type}`);
+        showNotification(`Нет данных для сохранения ${type}`, 'error');
         return;
     }
 
@@ -89,7 +161,7 @@ async function savePalette(type) {
     const paletteName = paletteNameInput.value || `${type}_${new Date().toLocaleString()}`;
 
     if (!paletteName) {
-        alert('Имя палитры не может быть пустым');
+        showNotification('Имя палитры не может быть пустым', 'error');
         return;
     }
 
@@ -113,10 +185,71 @@ async function savePalette(type) {
         }
 
         const result = await response.json();
-        alert(`Палитра ${paletteName} сохранена!`);
+        
+        // Сохраняем информацию о сохраненной палитре
+        savedPalettes[type] = {
+            id: result.id,
+            colors: colors
+        };
+        
+        // Меняем состояние кнопки
+        saveButton.classList.add('saved');
+        saveButton.innerHTML = '<img src="/static/img/save.png" alt="Saved">Сохранено';
+        
+        showNotification(`Палитра "${paletteName}" сохранена!`);
     } catch (e) {
         console.error(e);
-        showError(`Не удалось сохранить палитру ${paletteName}`);
+        showNotification(`Не удалось сохранить палитру ${paletteName}`, 'error');
+    }
+}
+
+async function deletePaletteById(paletteId, type = null) {
+    if (!username) {
+        showNotification('Вы не авторизованы', 'error');
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/palettes/${username}/${paletteId}/delete/`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`Ошибка: ${response.status}`);
+        }
+
+        // Если передан тип, сбрасываем кнопку
+        if (type && savedPalettes[type]) {
+            const saveButton = document.getElementById(`save-${type}`);
+            if (saveButton) {
+                saveButton.classList.remove('saved');
+                saveButton.innerHTML = '<img src="/static/img/save.png" alt="Save">Сохранить';
+            }
+            delete savedPalettes[type];
+        }
+        
+        // Если открыт попап с сохраненными палитрами, обновляем его
+        const popup = document.getElementById('palettes-popup');
+        if (popup) {
+            const item = popup.querySelector(`[data-palette-id="${paletteId}"]`);
+            if (item) {
+                item.remove();
+            }
+            
+            // Если больше нет палитр, показываем сообщение
+            const list = popup.querySelector('#saved-palettes-list');
+            if (list.children.length === 0) {
+                list.innerHTML = '<p>Нет сохраненных палитр</p>';
+            }
+        }
+
+        showNotification('Палитра удалена');
+    } catch (e) {
+        console.error(e);
+        showNotification('Не удалось удалить палитру', 'error');
     }
 }
 
@@ -134,7 +267,7 @@ function getCookie(name) {
     }
     return cookieValue;
 }
-// display
+
 function displaySinglePalette(type, colors) {
     const colorsContainer = document.getElementById(`${type}-colors`);
     const hexContainer = document.getElementById(`${type}-hex`);
@@ -152,7 +285,9 @@ function displaySinglePalette(type, colors) {
             colorsContainer.appendChild(box);
         });
 
-        hexContainer.textContent = colors.join(', ');
+        hexContainer.innerHTML = colors.map(color => 
+            `<span>${color}</span>`
+        ).join('');
     }
 }
 
@@ -176,16 +311,29 @@ function displayPalettes(data) {
                     colorsContainer.appendChild(box);
                 });
 
-                hexContainer.textContent = colors.join(', ');
+                hexContainer.innerHTML = colors.map(color => 
+                    `<span>${color}</span>`
+                ).join('');
             }
+        }
+        
+        // Сбрасываем состояние кнопок сохранения только для авторизованных пользователей
+        if (username) {
+            resetSaveButton(type);
         }
     }
 }
 
 // COPY
 function copyColor(color) {
-    navigator.clipboard.writeText(color);
-    alert(`Цвет ${color} скопирован!`);
+    navigator.clipboard.writeText(color)
+        .then(() => {
+            showNotification(`Цвет ${color} скопирован!`);
+        })
+        .catch(err => {
+            console.error('Ошибка копирования: ', err);
+            showNotification('Не удалось скопировать цвет', 'error');
+        });
 }
 
 function copyAll(type) {
@@ -195,49 +343,55 @@ function copyAll(type) {
         if (colorsText) {
             navigator.clipboard.writeText(colorsText)
                 .then(() => {
-                    alert(`Цвета ${type} скопированы!`);
+                    showNotification(`Цвета ${type} скопированы!`);
                 })
                 .catch(err => {
                     console.error('Ошибка копирования: ', err);
-                    alert('Не удалось скопировать цвета');
+                    showNotification('Не удалось скопировать цвета', 'error');
                 });
         } else {
-            alert(`Нет цветов для ${type}`);
+            showNotification(`Нет цветов для ${type}`, 'error');
         }
     } else {
-        alert(`Не найден контейнер для ${type}`);
+        showNotification(`Не найден контейнер для ${type}`, 'error');
     }
 }
 
-// SHOW
-function showError(message) {
-    let errorDiv = document.getElementById('error');
-    if (!errorDiv) {
-        errorDiv = document.createElement('div');
-        errorDiv.id = 'error';
-        errorDiv.style.color = 'red';
-        errorDiv.style.marginTop = '10px';
-        document.body.insertBefore(errorDiv, document.body.firstChild);
-    }
-    errorDiv.textContent = message;
-}
-
-function hideError() {
-    const errorDiv = document.getElementById('error');
-    if (errorDiv) {
-        errorDiv.textContent = '';
+// Функция для копирования всех цветов из сохраненной палитры
+function copySavedPalette(paletteId, paletteName) {
+    const popup = document.getElementById('palettes-popup');
+    if (!popup) return;
+    
+    const paletteDiv = popup.querySelector(`[data-palette-id="${paletteId}"]`);
+    if (!paletteDiv) return;
+    
+    const colorBoxes = paletteDiv.querySelectorAll('.palette-colors .color-box');
+    const colors = Array.from(colorBoxes).map(box => box.title);
+    
+    if (colors.length > 0) {
+        const colorsText = colors.join(', ');
+        navigator.clipboard.writeText(colorsText)
+            .then(() => {
+                showNotification(`Цвета палитры "${paletteName}" скопированы!`);
+            })
+            .catch(err => {
+                console.error('Ошибка копирования: ', err);
+                showNotification('Не удалось скопировать цвета', 'error');
+            });
+    } else {
+        showNotification('В палитре нет цветов для копирования', 'error');
     }
 }
 
 // showSavedPalettes
 async function showSavedPalettes() {
     if (!username) {
-        showError('Вы не авторизованы');
+        showNotification('Вы не авторизованы', 'error');
         return;
     }
 
     try {
-        const response = await fetch(`/api/palettes/${username}/`); //url
+        const response = await fetch(`/api/palettes/${username}/`);
         if (!response.ok) {
             throw new Error(`Ошибка: ${response.status}`);
         }
@@ -246,7 +400,7 @@ async function showSavedPalettes() {
         showPalettesPopup(username, palettes);
     } catch (e) {
         console.error(e);
-        showError('Не удалось загрузить сохранённые палитры');
+        showNotification('Не удалось загрузить сохранённые палитры', 'error');
     }
 }
 
@@ -256,39 +410,30 @@ function showPalettesPopup(username, palettes) {
 
     const popup = document.createElement('div');
     popup.id = 'palettes-popup';
-    popup.style.cssText = `
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background: white;
-        padding: 20px;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        z-index: 1000;
-        width: 600px;
-        max-height: 80vh;
-        overflow-y: auto;
-    `;
-
+    
     popup.innerHTML = `
         <h2>Сохранённые палитры</h2>
-        <div>
+        <div class="user-info">
+            <img src="${avatar}" alt="Аватар">
             <p><strong>Пользователь:</strong> ${username}</p>
-            <p><strong>Аватар:</strong> <img src="${avatar}"></p>
         </div>
         <div id="saved-palettes-list">
-            ${palettes.map(p => `
-                <div style="border: 1px solid #eee; padding: 10px; margin: 5px 0;" data-palette-id="${p.id}">
+            ${palettes.length > 0 ? palettes.map(p => `
+                <div data-palette-id="${p.id}">
                     <strong>${p.name}</strong>
-                    <div>
+                    <div class="palette-buttons">
+                        <button class="delete-btn" onclick="deletePalette(${p.id})">Удалить</button>
+                    </div>
+                    <div class="palette-colors">
                         ${p.colors.map(c => `
-                            <span class="color-box" style="background-color: ${c};" title="${c}"></span>
+                            <span class="color-box" style="background-color: ${c};" title="${c}" onclick="copyColor('${c}')"></span>
                         `).join('')}
                     </div>
-                    <button onclick="deletePalette(${p.id})">Удалить</button>
+                    <button class="saved-copy-button" onclick="copySavedPalette(${p.id}, '${p.name.replace(/'/g, "\\'")}')">
+                        <img src="/static/img/copy.png" alt="Copy">Скопировать все
+                    </button>
                 </div>
-            `).join('')}
+            `).join('') : '<p>Нет сохраненных палитр</p>'}
         </div>
         <button onclick="closePalettesPopup()">Закрыть</button>
     `;
@@ -301,33 +446,5 @@ function closePalettesPopup() {
 }
 
 async function deletePalette(paletteId) {
-    if (!username) {
-        showError('Вы не авторизованы');
-        return;
-    }
-
-    try {
-        const response = await fetch(`/api/palettes/${username}/${paletteId}/delete/`, { //url
-            method: 'DELETE',
-            headers: {
-                'X-CSRFToken': getCookie('csrftoken'),
-            }
-        });
-
-        if (!response.ok) {
-            throw new Error(`Ошибка: ${response.status}`);
-        }
-
-        // Удаляем элемент из DOM
-        const popup = document.getElementById('palettes-popup');
-        const item = popup.querySelector(`[data-palette-id="${paletteId}"]`);
-        if (item) {
-            item.remove();
-        }
-
-        alert('Палитра удалена');
-    } catch (e) {
-        console.error(e);
-        showError('Не удалось удалить палитру');
-    }
+    await deletePaletteById(paletteId);
 }

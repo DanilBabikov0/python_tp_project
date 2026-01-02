@@ -4,75 +4,108 @@
     <meta charset="UTF-8">
     <title>Генератор Палитр</title>
     <link rel="stylesheet" href="/static/css/main.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
 </head>
 <body>
     <header>
         <h1>Генератор Палитр</h1>
+        <p>Генератор по цвету</p>
         <nav>
             {% if user.is_authenticated %}
-                <button onclick="showSavedPalettes()">Сохраненные палитры</button>
+                <button onclick="showSavedPalettes()"><img src="/static/img/save.png" alt="Save">Сохраненные</button>
+                <a href="/image/"><button>Извлечь из изображения</button></a>
                 <a href="/logout/"><button>Выйти</button></a>
             {% else %}
                 <a href="/auth/"><button>Авторизоваться</button></a>
             {% endif %}
-            <button onclick="generateRandomAll()">Сгенерировать все</button>
+            <button onclick="generateRandomAll()"><img src="/static/img/random.png" alt="Random">Сгенерировать все</button>
         </nav>
     </header>
 
     <div class="controls">
         <input type="color" id="colorPicker">
         <input type="text" id="colorInput" placeholder="#FF5733">
-        <button onclick="randomColor()">Случайный цвет</button>
-        <button onclick="generatePalette()">Генерировать</button>
+        <button onclick="randomColor()"><img src="/static/img/random.png" alt="Random">Случайный цвет</button>
+        <button onclick="generatePalette()"><img src="/static/img/generate.png" alt="Generate"> Генерировать</button>
     </div>
 
     <div id="palettes">
         <div class="palette-section" id="monochromatic">
-            <h2>Monochromatic</h2>
-            <input type="text" id="monochromaticName" placeholder="Name">
-            <button onclick="generateRandom('monochromatic')">Сгенерировать снова</button>
-            {% if user.is_authenticated %}
-                <button onclick="savePalette('monochromatic')">Сохранить палитру</button>
-            {% endif %}
+            <h2>Монохромная палитра</h2>
+            <p>Оттенки одного цвета с разной яркостью</p>
+            <div class="palette-controls">
+                {% if user.is_authenticated %}
+                    <input type="text" id="monochromaticName" placeholder="Name">
+                {% endif %} 
+                <button onclick="generateRandom('monochromatic')"><img src="/static/img/refresh.png" alt="Refresh"></button>
+                {% if user.is_authenticated %}
+                    <button id="save-monochromatic" onclick="savePalette('monochromatic')"><img src="/static/img/save.png" alt="Save">Сохранить</button>
+                {% endif %}
+            </div>
             <div class="colors-container" id="monochromatic-colors"></div>
-            <div class="hex-container" id="monochromatic-hex"></div>
-            <button onclick="copyAll('monochromatic')">Скопировать цвета</button>
+            <div class="hex-and-copy">
+                <div class="hex-container" id="monochromatic-hex"></div>
+                <button class="copy-button" onclick="copyAll('monochromatic')"><img src="/static/img/copy.png" alt="Copy">Скопировать все</button>
+            </div>
         </div>
 
         <div class="palette-section" id="analogous">
-            <h2>Analogous</h2>
-            <input type="text" id="analogousName" placeholder="Name">
-            <button onclick="generateRandom('analogous')">Сгенерировать снова</button>
-            {% if user.is_authenticated %}
-                <button onclick="savePalette('analogous')">Сохранить палитру</button>
-            {% endif %}
+            <h2>Аналоговая палитра</h2>
+            <p>Соседние цвета на цветовом круге</p>
+            <div class="palette-controls">
+                {% if user.is_authenticated %}
+                    <input type="text" id="analogousName" placeholder="Name">
+                {% endif %} 
+                <button onclick="generateRandom('analogous')"><img src="/static/img/refresh.png" alt="Refresh"></button>
+                {% if user.is_authenticated %}
+                    <button id="save-analogous" onclick="savePalette('analogous')"><img src="/static/img/save.png" alt="Save">Сохранить</button>
+                {% endif %}
+            </div>
             <div class="colors-container" id="analogous-colors"></div>
-            <div class="hex-container" id="analogous-hex"></div>
-            <button onclick="copyAll('analogous')">Скопировать цвета</button>
+            <div class="hex-and-copy">
+                <div class="hex-container" id="analogous-hex"></div>
+                <button class="copy-button" onclick="copyAll('analogous')"><img src="/static/img/copy.png" alt="Copy">Скопировать все</button>
+            </div>
         </div>
 
         <div class="palette-section" id="complementary">
-            <h2>Complementary</h2>
-            <input type="text" id="complementaryName" placeholder="Name">
-            <button onclick="generateRandom('complementary')">Сгенерировать снова</button>
-            {% if user.is_authenticated %}
-                <button onclick="savePalette('complementary')">Сохранить палитру</button>
-            {% endif %}
+            <h2>Комплементарная палитра</h2>
+            <p>Противоположные цвета на цветовом круге</p>
+            <div class="palette-controls">
+                {% if user.is_authenticated %}
+                    <input type="text" id="complementaryName" placeholder="Name">
+                {% endif %} 
+                <button onclick="generateRandom('complementary')"><img src="/static/img/refresh.png" alt="Refresh"></button>
+                {% if user.is_authenticated %}
+                    <button id="save-complementary" onclick="savePalette('complementary')"><img src="/static/img/save.png" alt="Save">Сохранить</button>
+                {% endif %}
+            </div>
             <div class="colors-container" id="complementary-colors"></div>
-            <div class="hex-container" id="complementary-hex"></div>
-            <button onclick="copyAll('complementary')">Скопировать цвета</button>
+            <div class="hex-and-copy">
+                <div class="hex-container" id="complementary-hex"></div>
+                <button class="copy-button" onclick="copyAll('complementary')"><img src="/static/img/copy.png" alt="Copy">Скопировать все</button>
+            </div>
         </div>
 
         <div class="palette-section" id="triadic">
-            <h2>Triadic</h2>
-            <input type="text" id="triadicName" placeholder="Name">
-            <button onclick="generateRandom('triadic')">Сгенерировать снова</button>
-            {% if user.is_authenticated %}
-                <button onclick="savePalette('triadic')">Сохранить палитру</button>
-            {% endif %}
+            <h2>Триадная палитра</h2>
+            <p>Три цвета на равном расстоянии друг от друга</p>
+            <div class="palette-controls">
+                {% if user.is_authenticated %}
+                    <input type="text" id="triadicName" placeholder="Name">
+                {% endif %} 
+                <button onclick="generateRandom('triadic')"><img src="/static/img/refresh.png" alt="Refresh"></button>
+                {% if user.is_authenticated %}
+                    <button id="save-triadic" onclick="savePalette('triadic')"><img src="/static/img/save.png" alt="Save">Сохранить</button>
+                {% endif %}
+            </div>
             <div class="colors-container" id="triadic-colors"></div>
-            <div class="hex-container" id="triadic-hex"></div>
-            <button onclick="copyAll('triadic')">Скопировать цвета</button>
+            <div class="hex-and-copy">
+                <div class="hex-container" id="triadic-hex"></div>
+                <button class="copy-button" onclick="copyAll('triadic')"><img src="/static/img/copy.png" alt="Copy">Скопировать все</button>
+            </div>
         </div>
     </div>
 
@@ -80,20 +113,6 @@
         <p>Генератор Палитр</p>
     </footer>
 
-    <script>
-        document.getElementById('colorPicker').addEventListener('input', function() {
-            document.getElementById('colorInput').value = this.value;
-            hideError();
-        });
-
-        document.getElementById('colorInput').addEventListener('input', function() {
-            const color = this.value;
-            if (/^#[0-9A-F]{6}$/i.test(color)) {
-                document.getElementById('colorPicker').value = color;
-            }
-            hideError();
-        });
-    </script>
     <script>
         const username = '{{ user.username }}';
         {% if user.socialaccount_set.exists %}
