@@ -1,3 +1,21 @@
-{% load socialaccount %}
-<h1>Авторизация</h1>
-<a href="{% provider_login_url 'google' %}">Войти через Google</a>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Авторизация - Генератор Палитр</title>
+    <link rel="stylesheet" href="/static/css/auth.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="auth-container">
+        {% load socialaccount %}
+        <h1>Авторизация</h1>
+        <a href="{% provider_login_url 'google' %}" class="google-auth-btn">
+            <img src="/static/img/google.png" alt="Google">
+            Войти через Google
+        </a>
+    </div>
+</body>
+</html>
