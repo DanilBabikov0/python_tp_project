@@ -5,11 +5,27 @@ from django.shortcuts import redirect
 from django.contrib.auth import logout
 
 # PAGE
+def auth_page(request):
+    return render(request, 'auth.html')
+
+def main_page(request):
+    return render(request, 'main.html')
+
+@login_required
+def extract_page(request):
+    return render(request, 'extract.html')
+
+def custom_404_page(request, exception):
+    return render(request, '404.html', status=404)
+
+# AUTH
+def logout_view(request):
+    logout(request)
+    return redirect('/')
+
+# TESTING
 def palette_page(request):
     return render(request, 'palette.html')
-
-def home_page(request):
-    return render(request, 'main.html')
 
 @login_required
 def profile_page(request):
@@ -24,17 +40,5 @@ def profile_page(request):
     return render(request, 'profile.html', context)
 
 @login_required
-def image_upload_page(request):
-    return render(request, 'extract.html')
-
-@login_required
 def image_palettes_view(request):
     return render(request, 'image_palettes.html')
-
-def auth_page(request):
-    return render(request, 'auth.html')
-
-# AUTH
-def logout_view(request):
-    logout(request)
-    return redirect('/')

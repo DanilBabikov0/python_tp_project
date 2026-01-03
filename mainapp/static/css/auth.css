@@ -37,7 +37,9 @@ body {
     background: black;
     color: white;
 }
-
+.google-auth-btn:hover img {
+    filter: invert(1);
+}
 .google-auth-btn img {
     width: 20px;
     height: 20px;

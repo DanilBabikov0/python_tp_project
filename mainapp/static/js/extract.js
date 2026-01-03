@@ -174,7 +174,7 @@ function displayExtractedColors() {
         const colorBox = document.createElement('div');
         colorBox.className = 'color-box';
         colorBox.style.backgroundColor = color;
-        colorBox.title = `${color} (Цвет ${index + 1})`;
+        colorBox.title = `${color}`;
         colorBox.setAttribute('data-color', color);
         colorBox.onclick = () => copyColor(color);
         colorsContainer.appendChild(colorBox);
@@ -228,7 +228,7 @@ function hideProgressBar() {
 function copyColor(color) {
     navigator.clipboard.writeText(color)
         .then(() => {
-            showNotification(`✓ Цвет ${color} скопирован в буфер обмена!`);
+            showNotification(`Цвет ${color} скопирован в буфер обмена!`);
         })
         .catch(err => {
             console.error('Ошибка копирования:', err);

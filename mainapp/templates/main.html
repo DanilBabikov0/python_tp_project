@@ -15,8 +15,8 @@
         <nav>
             {% if user.is_authenticated %}
                 <button onclick="showSavedPalettes()"><img src="/static/img/save.png" alt="Save">Сохраненные</button>
-                <a href="/image/"><button>Извлечь из изображения</button></a>
-                <a href="/logout/"><button>Выйти</button></a>
+                <a href="/extract/"><button>Извлечь из изображения</button></a>
+                <a href="/logout/"><button><img src="/static/img/logout.png" alt="Logout">Выйти</button></a>
             {% else %}
                 <a href="/auth/"><button>Авторизоваться</button></a>
             {% endif %}

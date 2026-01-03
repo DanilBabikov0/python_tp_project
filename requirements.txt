@@ -8,5 +8,6 @@ djangorestframework
 numpy
 Pillow
 scikit-learn
+whitenoise
 
 #pip install -r requirements.txt
