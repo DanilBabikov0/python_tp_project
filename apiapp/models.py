@@ -4,32 +4,93 @@ from django.utils import timezone
 import os
 
 class Palette(models.Model):
-    id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=100)
-    owner = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+    """Модель пользовательских палитр цветов"""
+    id = models.AutoField(
+        primary_key=True, 
+        verbose_name="ID"
+    )
+    name = models.CharField(
+        max_length=100,
+        verbose_name="Название палитры"
+    )
+    owner = models.ForeignKey(
+        User, 
+        on_delete=models.CASCADE, 
+        verbose_name="Владелец"
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name="Дата создания"
+    )
 
     def __str__(self):
-        return f"{self.name} {self.owner.username}"
+        return f"{self.name} (Владелец: {self.owner.username})"
+    
+    class Meta:
+        verbose_name = "Palette"
+
 
 class Color(models.Model):
-    hex_code = models.CharField(max_length=7)
-    palette = models.ForeignKey(Palette, on_delete=models.CASCADE, related_name='colors')
-    created_at = models.DateTimeField(auto_now_add=True)
+    """Модель цвета в палитре"""
+    hex_code = models.CharField(
+        max_length=7,
+        verbose_name="Hex-код"
+    )
+    palette = models.ForeignKey(
+        Palette, 
+        on_delete=models.CASCADE, 
+        related_name='colors',
+        verbose_name="Палитра"
+    )
+    """name = models.CharField(
+        max_length=50,
+        blank=True,
+        null=True,
+        verbose_name='Название цвета'
+    )"""
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name="Дата создания"
+    )
 
     def __str__(self):
         return self.hex_code
     
+    class Meta:
+        verbose_name = "Color"
+
+
 class ImagePalette(models.Model):
-    id = models.AutoField(primary_key=True)
-    image_name = models.CharField(max_length=100)
-    preview = models.ImageField(upload_to='', blank=True, null=True)
-    colors = models.JSONField()
-    owner = models.ForeignKey(User, on_delete=models.CASCADE)
-    created_at = models.DateTimeField(auto_now_add=True)
+    """Модель палитры, извлеченной из изображения"""
+    id = models.AutoField(
+        primary_key=True,
+        verbose_name="ID"
+    )
+    image_name = models.CharField(
+        max_length=100,
+        verbose_name="Название изображения"
+    )
+    preview = models.ImageField(
+        upload_to='', 
+        blank=True, 
+        null=True,
+        verbose_name="Превью"
+    )
+    colors = models.JSONField(
+        verbose_name="Извлеченные цвета"
+    )
+    owner = models.ForeignKey(
+        User, 
+        on_delete=models.CASCADE,
+        verbose_name="Владелец"
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name="Дата создания"
+    )
 
     def __str__(self):
-        return f"{self.image_name} ({self.owner.username})"
+        return f"{self.image_name} (Владелец: {self.owner.username})"
     
     def delete(self, *args, **kwargs):
         if self.preview:
@@ -37,10 +98,28 @@ class ImagePalette(models.Model):
                 os.remove(self.preview.path)
         super().delete(*args, **kwargs)
 
+    class Meta:
+        verbose_name = "ImagePalette"
+
+
 class ExtractUsage(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    last_used = models.DateTimeField(auto_now_add=True) 
-    count = models.IntegerField(default=0)
+    """Модель для отслеживания лимитов использования функции извлечения цветов"""
+    user = models.ForeignKey(
+        User, 
+        on_delete=models.CASCADE,
+        verbose_name="Пользователь"
+    )
+    last_used = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name="Последнее использование"
+    ) 
+    count = models.IntegerField(
+        default=0,
+        verbose_name="Счетчик использований"
+    )
 
     def __str__(self):
         return f"{self.user.username} - {self.last_used}: {self.count}"
+    
+    class Meta:
+        verbose_name = "Limit"
