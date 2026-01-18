@@ -9,8 +9,8 @@ from rest_framework import status
 
 from apiapp.models import Color, Palette, ImagePalette, ExtractUsage
 
-from .color_utils import hex_to_rgb, palette_response, generate_random_color
-from .image_utils import extract_colors, create_preview
+from apiapp.color_utils import hex_to_rgb, palette_response, generate_random_color, get_color_name
+from apiapp.image_utils import extract_colors, create_preview
 from datetime import timedelta
 
 # PAGE
@@ -24,13 +24,10 @@ def generate_palette_view(request):
 
     if not base:
         return Response({'error': 'Base are required'}, status=status.HTTP_400_BAD_REQUEST)
-    
     if base.startswith('#'):
         base = base[1:]
-
     if len(base) != 6:
         return Response({'error': 'Color must be in format #FFFFFF'}, status=status.HTTP_400_BAD_REQUEST)
-
     try:
         r, g, b = hex_to_rgb(base)
     except ValueError:
@@ -46,6 +43,13 @@ def random_palette_view(request):
     result = palette_response(r, g, b)
 
     return Response(result)
+
+@api_view(['GET'])
+def get_color_name_view(request):
+    hex_code = request.GET.get('color')
+    name = get_color_name(hex_code)
+
+    return Response(name)
 
 # USER
 User = get_user_model()

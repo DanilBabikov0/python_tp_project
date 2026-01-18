@@ -16,6 +16,8 @@ class Palette(models.Model):
     owner = models.ForeignKey(
         User, 
         on_delete=models.CASCADE, 
+        blank=True,
+        null=True,
         verbose_name="Владелец"
     )
     created_at = models.DateTimeField(
@@ -42,19 +44,13 @@ class Color(models.Model):
         related_name='colors',
         verbose_name="Палитра"
     )
-    """name = models.CharField(
-        max_length=50,
-        blank=True,
-        null=True,
-        verbose_name='Название цвета'
-    )"""
     created_at = models.DateTimeField(
         auto_now_add=True,
         verbose_name="Дата создания"
     )
 
     def __str__(self):
-        return self.hex_code
+        return f"{self.name} ({self.hex_code})"
     
     class Meta:
         verbose_name = "Color"
