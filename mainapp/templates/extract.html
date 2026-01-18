@@ -1,9 +1,10 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <title>Генератор Палитр - Извлечение цветов</title>
-    <link rel="stylesheet" href="/static/css/extract.css">
+    <link rel="stylesheet" href="{% static 'css/extract.css' %}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
@@ -13,9 +14,13 @@
         <h1>Генератор Палитр</h1>
         <p>Извлечение цветов из изображения</p>
         <nav>
-            <button onclick="loadImagePalettes()"><img src="/static/img/save.png" alt="Save">Изображения</button>
+            <button onclick="loadImagePalettes()">
+                <img src="{% static 'img/save.png' %}" alt="Save">Изображения
+            </button>
             <a href="/"><button>Генератор палитр</button></a>
-            <a href="/logout/"><button><img src="/static/img/logout.png" alt="Logout">Выйти</button></a>
+            <a href="/logout/"><button>
+                <img src="{% static 'img/logout.png' %}" alt="Logout">Выйти
+            </button></a>
         </nav>
     </header>
 
@@ -64,13 +69,15 @@
                 <span class="hex-placeholder">HEX значения</span>
             </div>
             <button class="copy-button" onclick="copyAll()">
-                <img src="/static/img/copy.png" alt="Copy">Скопировать все
+                <img src="{% static 'img/copy.png' %}" alt="Copy">Скопировать все
             </button>
         </div>
     </div>
 
     <footer>
-        <p>Извлечение цветов из изображения • {% now "Y" %}</p>
+        <p>Генератор Палитр © {% now "Y" %}</p>
+        <p>Извлечение цветов из изображения</p>
+        <p>Данил Бабиков</p>
     </footer>
 
     <script>
@@ -79,10 +86,10 @@
         {% if user.socialaccount_set.exists %}
             const avatar = '{{ user.socialaccount_set.first.get_avatar_url }}';
         {% else %}
-            const avatar = '/static/images/default-avatar.png';
+            const avatar = "{% static 'img/default-avatar.png' %}";
         {% endif %}
     </script>
     
-    <script src="/static/js/extract.js"></script>
+    <script src="{% static 'js/extract.js' %}"></script>
 </body>
 </html>

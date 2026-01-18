@@ -620,14 +620,12 @@ nav button:last-child:hover {
     background: #cc0000;
 }
 
-/* Иконки */
 button img {
     width: 14px;
     height: 14px;
     vertical-align: middle;
 }
 
-/* Футер */
 footer {
     margin-top: 40px;
     padding: 20px 0;
@@ -654,7 +652,6 @@ footer p {
     font-weight: 500;
 }
 
-/* Анимации */
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(-10px); }
     to { opacity: 1; transform: translateY(0); }

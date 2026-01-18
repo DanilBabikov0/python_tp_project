@@ -1,9 +1,10 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <title>Генератор Палитр - Генератор палитр</title>
-    <link rel="stylesheet" href="/static/css/main.css">
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
@@ -14,21 +15,31 @@
         <p>Генератор по цвету</p>
         <nav>
             {% if user.is_authenticated %}
-                <button onclick="showSavedPalettes()"><img src="/static/img/save.png" alt="Save">Сохраненные</button>
+                <button onclick="showSavedPalettes()">
+                    <img src="{% static 'img/save.png' %}" alt="Save">Сохраненные
+                </button>
                 <a href="/extract/"><button>Извлечь из изображения</button></a>
-                <a href="/logout/"><button><img src="/static/img/logout.png" alt="Logout">Выйти</button></a>
+                <a href="/logout/"><button>
+                    <img src="{% static 'img/logout.png' %}" alt="Logout">Выйти
+                </button></a>
             {% else %}
                 <a href="/auth/"><button>Авторизоваться</button></a>
             {% endif %}
-            <button onclick="generateRandomAll()"><img src="/static/img/random.png" alt="Random">Сгенерировать все</button>
+            <button onclick="generateRandomAll()">
+                <img src="{% static 'img/random.png' %}" alt="Random">Сгенерировать все
+            </button>
         </nav>
     </header>
 
     <div class="controls">
         <input type="color" id="colorPicker">
         <input type="text" id="colorInput" placeholder="#FF5733">
-        <button onclick="randomColor()"><img src="/static/img/random.png" alt="Random">Случайный цвет</button>
-        <button onclick="generatePalette()"><img src="/static/img/generate.png" alt="Generate"> Генерировать</button>
+        <button onclick="randomColor()">
+            <img src="{% static 'img/random.png' %}" alt="Random">Случайный цвет
+        </button>
+        <button onclick="generatePalette()">
+            <img src="{% static 'img/generate.png' %}" alt="Generate"> Генерировать
+        </button>
     </div>
 
     <div id="palettes">
@@ -39,15 +50,21 @@
                 {% if user.is_authenticated %}
                     <input type="text" id="monochromaticName" placeholder="Name">
                 {% endif %} 
-                <button onclick="generateRandom('monochromatic')"><img src="/static/img/refresh.png" alt="Refresh"></button>
+                <button onclick="generateRandom('monochromatic')">
+                    <img src="{% static 'img/refresh.png' %}" alt="Refresh">
+                </button>
                 {% if user.is_authenticated %}
-                    <button id="save-monochromatic" onclick="savePalette('monochromatic')"><img src="/static/img/save.png" alt="Save">Сохранить</button>
+                    <button id="save-monochromatic" onclick="savePalette('monochromatic')">
+                        <img src="{% static 'img/save.png' %}" alt="Save">Сохранить
+                    </button>
                 {% endif %}
             </div>
             <div class="colors-container" id="monochromatic-colors"></div>
             <div class="hex-and-copy">
                 <div class="hex-container" id="monochromatic-hex"></div>
-                <button class="copy-button" onclick="copyAll('monochromatic')"><img src="/static/img/copy.png" alt="Copy">Скопировать все</button>
+                <button class="copy-button" onclick="copyAll('monochromatic')">
+                    <img src="{% static 'img/copy.png' %}" alt="Copy">Скопировать все
+                </button>
             </div>
         </div>
 
@@ -58,15 +75,21 @@
                 {% if user.is_authenticated %}
                     <input type="text" id="analogousName" placeholder="Name">
                 {% endif %} 
-                <button onclick="generateRandom('analogous')"><img src="/static/img/refresh.png" alt="Refresh"></button>
+                <button onclick="generateRandom('analogous')">
+                    <img src="{% static 'img/refresh.png' %}" alt="Refresh">
+                </button>
                 {% if user.is_authenticated %}
-                    <button id="save-analogous" onclick="savePalette('analogous')"><img src="/static/img/save.png" alt="Save">Сохранить</button>
+                    <button id="save-analogous" onclick="savePalette('analogous')">
+                        <img src="{% static 'img/save.png' %}" alt="Save">Сохранить
+                    </button>
                 {% endif %}
             </div>
             <div class="colors-container" id="analogous-colors"></div>
             <div class="hex-and-copy">
                 <div class="hex-container" id="analogous-hex"></div>
-                <button class="copy-button" onclick="copyAll('analogous')"><img src="/static/img/copy.png" alt="Copy">Скопировать все</button>
+                <button class="copy-button" onclick="copyAll('analogous')">
+                    <img src="{% static 'img/copy.png' %}" alt="Copy">Скопировать все
+                </button>
             </div>
         </div>
 
@@ -77,15 +100,21 @@
                 {% if user.is_authenticated %}
                     <input type="text" id="complementaryName" placeholder="Name">
                 {% endif %} 
-                <button onclick="generateRandom('complementary')"><img src="/static/img/refresh.png" alt="Refresh"></button>
+                <button onclick="generateRandom('complementary')">
+                    <img src="{% static 'img/refresh.png' %}" alt="Refresh">
+                </button>
                 {% if user.is_authenticated %}
-                    <button id="save-complementary" onclick="savePalette('complementary')"><img src="/static/img/save.png" alt="Save">Сохранить</button>
+                    <button id="save-complementary" onclick="savePalette('complementary')">
+                        <img src="{% static 'img/save.png' %}" alt="Save">Сохранить
+                    </button>
                 {% endif %}
             </div>
             <div class="colors-container" id="complementary-colors"></div>
             <div class="hex-and-copy">
                 <div class="hex-container" id="complementary-hex"></div>
-                <button class="copy-button" onclick="copyAll('complementary')"><img src="/static/img/copy.png" alt="Copy">Скопировать все</button>
+                <button class="copy-button" onclick="copyAll('complementary')">
+                    <img src="{% static 'img/copy.png' %}" alt="Copy">Скопировать все
+                </button>
             </div>
         </div>
 
@@ -96,21 +125,29 @@
                 {% if user.is_authenticated %}
                     <input type="text" id="triadicName" placeholder="Name">
                 {% endif %} 
-                <button onclick="generateRandom('triadic')"><img src="/static/img/refresh.png" alt="Refresh"></button>
+                <button onclick="generateRandom('triadic')">
+                    <img src="{% static 'img/refresh.png' %}" alt="Refresh">
+                </button>
                 {% if user.is_authenticated %}
-                    <button id="save-triadic" onclick="savePalette('triadic')"><img src="/static/img/save.png" alt="Save">Сохранить</button>
+                    <button id="save-triadic" onclick="savePalette('triadic')">
+                        <img src="{% static 'img/save.png' %}" alt="Save">Сохранить
+                    </button>
                 {% endif %}
             </div>
             <div class="colors-container" id="triadic-colors"></div>
             <div class="hex-and-copy">
                 <div class="hex-container" id="triadic-hex"></div>
-                <button class="copy-button" onclick="copyAll('triadic')"><img src="/static/img/copy.png" alt="Copy">Скопировать все</button>
+                <button class="copy-button" onclick="copyAll('triadic')">
+                    <img src="{% static 'img/copy.png' %}" alt="Copy">Скопировать все
+                </button>
             </div>
         </div>
     </div>
 
     <footer>
-        <p>Генератор Палитр • {% now "Y" %}</p>
+        <p>Генератор Палитр © {% now "Y" %}</p>
+        <p>Генерация палитр по цвету</p>
+        <p>Данил Бабиков</p>
     </footer>
 
     <script>
@@ -118,9 +155,9 @@
         {% if user.socialaccount_set.exists %}
             const avatar = '{{ user.socialaccount_set.first.get_avatar_url }}';
         {% else %}
-            const avatar = '/static/images/default-avatar.png';
+            const avatar = "{% static 'img/default-avatar.png' %}";
         {% endif %}
     </script>
-    <script src="/static/js/main.js"></script>
+    <script src="{% static 'js/main.js' %}"></script>
 </body>
 </html>
