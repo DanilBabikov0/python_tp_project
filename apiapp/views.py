@@ -13,10 +13,6 @@ from apiapp.color_utils import hex_to_rgb, palette_response, generate_random_col
 from apiapp.image_utils import extract_colors, create_preview
 from datetime import timedelta
 
-# PAGE
-def docx_page(request):
-    return render(request, 'docx.html')
-
 # GENERATE
 @api_view(['GET'])
 def generate_palette_view(request):
