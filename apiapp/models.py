@@ -50,7 +50,7 @@ class Color(models.Model):
     )
 
     def __str__(self):
-        return f"{self.name} ({self.hex_code})"
+        return f"{self.hex_code}"
     
     class Meta:
         verbose_name = "Color"
